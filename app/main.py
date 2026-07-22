@@ -9,5 +9,12 @@ app = FastAPI(
 @app.get("/")
 def root():
     return {
-        "message": " Expense Tracker API Running"
+        "message": "Expense Tracker API Running"
+    }
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy"
     }
