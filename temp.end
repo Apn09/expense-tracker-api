@@ -1,6 +1,0 @@
-@app.get("/config")
-def config():
-    return {
-        "app": settings.APP_NAME,
-        "environment": settings.APP_ENV
-    }
