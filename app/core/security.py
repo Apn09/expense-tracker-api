@@ -1,9 +1,16 @@
 from datetime import datetime, timedelta, timezone
 
-from jose import jwt
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 
+from fastapi import Depends, HTTPException, status
+from fastapi.security import (
+    HTTPBearer,
+    HTTPAuthorizationCredentials
+)
+
 from app.core.config import settings
+
 
 # Password hashing
 pwd_context = CryptContext(
@@ -11,13 +18,21 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
+
+# HTTP Bearer Authentication
+security = HTTPBearer()
+
+
 # Hash Password
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
 # Verify Password
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+def verify_password(
+    plain_password: str,
+    hashed_password: str
+) -> bool:
     return pwd_context.verify(
         plain_password,
         hashed_password
@@ -42,3 +57,33 @@ def create_access_token(data: dict):
     )
 
     return token
+
+
+# Verify JWT Token
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )
+
+        email = payload.get("sub")
+
+        if email is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token"
+            )
+
+        return payload
+
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
+        )
