@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.crud.crud_user import user_crud
 from app.models.user import User
 from app.schemas.user import UserCreate
+
 from app.core.security import (
     hash_password,
     verify_password,
@@ -12,42 +13,57 @@ from app.core.security import (
 
 def register_user(db: Session, user: UserCreate):
 
-    # Check email already exists
-    if user_crud.get_by_email(db, user.email):
-        raise Exception("Email already registered")
-
-    # Check username already exists
-    if user_crud.get_by_username(db, user.username):
-        raise Exception("Username already exists")
-
-    # Create new user
-    new_user = User(
-        username=user.username,
-        email=user.email,
-        hashed_password=hash_password(user.password),
+    existing_user = user_crud.get_by_email(
+        db,
+        user.email
     )
 
-    return user_crud.create(db, new_user)
+    if existing_user:
+        raise Exception("Email already registered")
+
+    new_user = User(
+        email=user.email,
+        hashed_password=hash_password(user.password)
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
 
 
-def login_user(db: Session, email: str, password: str):
+def login_user(
+    db: Session,
+    email: str,
+    password: str
+):
 
-    # Find user
-    user = user_crud.get_by_email(db, email)
+    user = user_crud.get_by_email(
+        db,
+        email
+    )
 
     if not user:
-        raise Exception("Invalid email or password")
+        raise Exception(
+            "Invalid email or password"
+        )
 
-    # Verify password
-    if not verify_password(password, user.hashed_password):
-        raise Exception("Invalid email or password")
+    if not verify_password(
+        password,
+        user.hashed_password
+    ):
+        raise Exception(
+            "Invalid email or password"
+        )
 
-    # Generate JWT
     access_token = create_access_token(
-        {"sub": user.email}
+        {
+            "sub": user.email
+        }
     )
 
     return {
         "access_token": access_token,
-        "token_type": "bearer",
+        "token_type": "bearer"
     }
