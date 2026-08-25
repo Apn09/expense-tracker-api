@@ -1,31 +1,34 @@
 from datetime import datetime
 from decimal import Decimal
-from pydantic import BaseModel, Field, field_validator
+
+from pydantic import BaseModel, Field
 
 from app.core.enums import ExpenseCategory
 
 
 class ExpenseCreate(BaseModel):
 
-    amount: Decimal= Field(gt=0)
+    amount: Decimal = Field(gt=0)
+
     category: ExpenseCategory
+
     description: str | None = None
+
     expense_date: datetime
 
-    @field_validator("category", mode="before")
-    @classmethod
-    def normalize_category(cls, value):
 
-        if isinstance(value, str):
-            value = value.strip().lower()
+class ExpenseUpdate(BaseModel):
 
-            for category in ExpenseCategory:
-                if category.value.lower() == value:
-                    return category
+    amount: Decimal | None = Field(
+        default=None,
+        gt=0
+    )
 
-        raise ValueError(
-            "Invalid expense category"
-        )
+    category: ExpenseCategory | None = None
+
+    description: str | None = None
+
+    expense_date: datetime | None = None
 
 
 class ExpenseResponse(BaseModel):

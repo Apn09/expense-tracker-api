@@ -50,4 +50,7 @@ def login(
 def read_current_user(
     current_user=Depends(get_current_user)
 ):
-    return current_user
+    return {
+        "id": current_user.id,
+        "email": current_user.email
+    }
