@@ -12,3 +12,4 @@ class ExpenseCategory(str, Enum):
     EDUCATION = "Education"
     TRAVEL = "Travel"
     OTHER = "Other"
+    SALARY = "Salary"
