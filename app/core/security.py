@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import secrets
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import (
@@ -131,3 +132,6 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
+#Forget password
+def generate_password_reset_token() -> str:
+    return secrets.token_urlsafe(32)

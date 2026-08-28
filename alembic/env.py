@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 import os
-
+from app.models.password_reset import PasswordResetToken
 from dotenv import load_dotenv
 
 from sqlalchemy import engine_from_config
