@@ -24,12 +24,12 @@ class PasswordResetToken(Base):
         nullable=False
     )
 
-    token = Column(
-        String,
-        unique=True,
-        nullable=False,
-        index=True
-    )
+    token_hash = Column(
+    String,
+    unique=True,
+    nullable=False,
+    index=True
+)
 
     expires_at = Column(
         DateTime(timezone=True),

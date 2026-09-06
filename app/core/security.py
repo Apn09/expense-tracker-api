@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import secrets
+import hashlib
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import (
@@ -135,3 +136,8 @@ def get_current_user(
 #Forget password
 def generate_password_reset_token() -> str:
     return secrets.token_urlsafe(32)
+
+def hash_reset_token(token: str) -> str:
+    return hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
