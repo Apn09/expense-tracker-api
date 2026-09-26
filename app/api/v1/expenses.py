@@ -1,19 +1,29 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
+from app.core.enums import ExpenseCategory
 from app.db.database import get_db
 from app.models.user import User
+
 from app.schemas.expense import (
     ExpenseCreate,
     ExpenseUpdate,
     ExpenseResponse,
+    ExpenseSummaryResponse,
 )
+
 from app.services.expense_service import (
     create_expense,
     get_user_expenses,
     update_expense,
     delete_expense,
+)
+
+from app.services.expense_summary_service import (
+    get_expense_summary,
 )
 
 
@@ -52,6 +62,50 @@ def list_expenses(
     return get_user_expenses(
         db=db,
         user_id=current_user.id
+    )
+
+
+@router.get(
+    "/summary",
+    response_model=ExpenseSummaryResponse
+)
+def expense_summary(
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+    category: ExpenseCategory | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    today = datetime.now()
+
+    # Default: current month
+    if start_date is None:
+        start_date = today.replace(
+            day=1,
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0
+        )
+
+    # Default: today
+    if end_date is None:
+        end_date = today
+
+    # Validate date range
+    if start_date > end_date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Start date cannot be after end date"
+        )
+
+    return get_expense_summary(
+        db=db,
+        user_id=current_user.id,
+        start_date=start_date,
+        end_date=end_date,
+        category=category
     )
 
 
@@ -105,4 +159,4 @@ def delete_expense_api(
 
     return {
         "message": "Expense deleted Sucessfully"
-}
+    }

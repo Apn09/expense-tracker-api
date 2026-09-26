@@ -5,7 +5,7 @@ from app.db.database import get_db
 from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import register_user, login_user
 from app.core.security import get_current_user
-
+from app.core.security import hash_password
 
 router = APIRouter(
     prefix="/auth",
