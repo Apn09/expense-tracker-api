@@ -43,3 +43,12 @@ class ExpenseResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ExpenseSummaryResponse(BaseModel):
+
+    start_date: str
+    end_date: str
+    total_expense: Decimal
+    expense_count: int
+    category_summary: dict[str, Decimal]
